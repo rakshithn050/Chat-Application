@@ -4,18 +4,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Lock, Mail } from "lucide-react";
+import { apiClient } from "/lib/api-client";
+import { SIGNUP_ROUTE } from "/utils/constants";
+import { toast } from "sonner";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const signUpRef = useRef(null);
   const loginRef = useRef(null);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleValidation = () => {
     let hasError = false;
 
     if (!email) {
@@ -32,7 +36,43 @@ const Auth = () => {
       setPasswordError("");
     }
 
-    if (hasError) return;
+    if (activeTab === "signup" && password !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match.");
+      hasError = true;
+    } else {
+      setConfirmPasswordError("");
+    }
+
+    return hasError;
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    if (handleValidation()) return;
+
+    try {
+      const response = await apiClient.post(SIGNUP_ROUTE, { email, password });
+      if (response.status === 201) {
+        toast.success("Registration Successful");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setEmailError("");
+        setPasswordError("");
+        setConfirmPasswordError("");
+      }
+    } catch (error) {
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      console.log(error);
+      toast.error(`Sign up failed. ${error.response.data.message}`);
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (handleValidation()) return;
 
     try {
       // Your login logic here
@@ -42,35 +82,6 @@ const Auth = () => {
       setEmailError(
         "Login failed. Please check your credentials and try again."
       );
-    }
-  };
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    let hasError = false;
-
-    if (!email) {
-      setEmailError("Email is required.");
-      hasError = true;
-    } else {
-      setEmailError("");
-    }
-
-    if (!password) {
-      setPasswordError("Password is required.");
-      hasError = true;
-    } else {
-      setPasswordError("");
-    }
-
-    if (hasError) return;
-
-    try {
-      // Your signup logic here
-      setEmailError("");
-      setPasswordError("");
-    } catch (error) {
-      setEmailError("Sign up failed. Please check your details and try again.");
     }
   };
 
@@ -117,11 +128,12 @@ const Auth = () => {
                         name="email"
                         type="email"
                         required
-                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600"
+                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
                         placeholder="Enter your Email Address"
                         onChange={(e) => {
                           setEmail(e.target.value);
                         }}
+                        value={email}
                       />
                       <Mail
                         className="w-[18px] h-[18px] absolute right-4"
@@ -146,6 +158,7 @@ const Auth = () => {
                         onChange={(e) => {
                           setPassword(e.target.value);
                         }}
+                        value={password}
                       />
                       <Lock
                         className="w-[18px] h-[18px] absolute right-4"
@@ -154,6 +167,33 @@ const Auth = () => {
                     </div>
                     {passwordError && (
                       <p className="text-red-500 text-sm">{passwordError}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-gray-800 text-sm mb-2 block">
+                      Confirm Password
+                    </Label>
+                    <div className="relative flex items-center">
+                      <Input
+                        name="confirmPassword"
+                        type="password"
+                        required
+                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600"
+                        placeholder="Confirm password"
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                        }}
+                        value={confirmPassword}
+                      />
+                      <Lock
+                        className="w-[18px] h-[18px] absolute right-4"
+                        color="gray"
+                      />
+                    </div>
+                    {confirmPasswordError && (
+                      <p className="text-red-500 text-sm">
+                        {confirmPasswordError}
+                      </p>
                     )}
                   </div>
 
@@ -193,6 +233,7 @@ const Auth = () => {
                         onChange={(e) => {
                           setEmail(e.target.value);
                         }}
+                        value={email}
                       />
                       <Mail
                         className="w-[18px] h-[18px] absolute right-4"
@@ -217,6 +258,7 @@ const Auth = () => {
                         onChange={(e) => {
                           setPassword(e.target.value);
                         }}
+                        value={password}
                       />
                       <Lock
                         className="w-[18px] h-[18px] absolute right-4"
