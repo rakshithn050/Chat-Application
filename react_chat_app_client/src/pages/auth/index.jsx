@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Lock, Mail } from "lucide-react";
 import { apiClient } from "/lib/api-client";
-import { SIGNUP_ROUTE } from "/utils/constants";
+import { SIGNUP_ROUTE, LOGIN_ROUTE } from "/utils/constants";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("signup");
@@ -18,6 +19,7 @@ const Auth = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const signUpRef = useRef(null);
   const loginRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleValidation = () => {
     let hasError = false;
@@ -46,6 +48,15 @@ const Auth = () => {
     return hasError;
   };
 
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setEmailError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+  };
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     if (handleValidation()) return;
@@ -58,19 +69,17 @@ const Auth = () => {
       );
       if (response.status === 201) {
         toast.success("Registration Successful");
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
-        setEmailError("");
-        setPasswordError("");
-        setConfirmPasswordError("");
+        resetForm();
+        setTimeout(() => {
+          navigate("/profile");
+        }, 2000);
       }
     } catch (error) {
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
+      resetForm();
       console.log(error);
-      toast.error(`Sign up failed. ${error.response.data.message}`);
+      toast.error(
+        `Sign up failed. ${error.response?.data?.message || error.message}`
+      );
     }
   };
 
@@ -79,12 +88,28 @@ const Auth = () => {
     if (handleValidation()) return;
 
     try {
-      // Your login logic here
-      setEmailError("");
-      setPasswordError("");
+      const response = await apiClient.post(
+        LOGIN_ROUTE,
+        { email, password },
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        toast.success("Login Successful");
+        resetForm();
+        console.log(response?.data?.user?.profileSetup);
+        setTimeout(() => {
+          if (response?.data?.user?.profileSetup) {
+            navigate("/chat");
+          } else {
+            navigate("/profile");
+          }
+        }, 2000);
+      }
     } catch (error) {
-      setEmailError(
-        "Login failed. Please check your credentials and try again."
+      resetForm();
+      console.log(error);
+      toast.error(
+        `Could Not Login. ${error.response?.data?.message || error.message}`
       );
     }
   };
