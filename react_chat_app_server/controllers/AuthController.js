@@ -1,5 +1,5 @@
-import User from "../models/UserModel";
-import { errorHandler } from "../utils/ErrorHandler";
+import User from "../models/UserModel.js";
+import { errorHandler } from "../utils/ErrorHandler.js";
 import jwt from "jsonwebtoken";
 
 const expiryDuration = 3 * 24 * 60 * 60 * 1000;
@@ -12,7 +12,7 @@ const token = (email, userID) => {
 export const signup = async (request, response, next) => {
   try {
     const { email, password } = request.body;
-
+    
     if (!email || !password) {
       return next(errorHandler(400, "Email and Password fields are required"));
     }
@@ -22,7 +22,7 @@ export const signup = async (request, response, next) => {
       return next(errorHandler(400, "User already exists with this email"));
     }
 
-    const user = await User.create({ email, password: hashedPassword });
+    const user = await User.create({ email, password });
 
     const authToken = token(user.email, user._id);
 
