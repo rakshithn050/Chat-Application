@@ -8,6 +8,7 @@ import { apiClient } from "/lib/api-client";
 import { SIGNUP_ROUTE, LOGIN_ROUTE } from "/utils/constants";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/store";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("signup");
@@ -20,6 +21,7 @@ const Auth = () => {
   const signUpRef = useRef(null);
   const loginRef = useRef(null);
   const navigate = useNavigate();
+  const { setUserInfo } = useAppStore();
 
   const handleValidation = () => {
     let hasError = false;
@@ -69,6 +71,7 @@ const Auth = () => {
       );
       if (response.status === 201) {
         toast.success("Registration Successful");
+        setUserInfo(response?.data?.user);
         resetForm();
         setTimeout(() => {
           navigate("/profile");
@@ -95,8 +98,9 @@ const Auth = () => {
       );
       if (response.status === 200) {
         toast.success("Login Successful");
+        setUserInfo(response?.data?.user);
+        console.log(response?.data?.user);
         resetForm();
-        console.log(response?.data?.user?.profileSetup);
         setTimeout(() => {
           if (response?.data?.user?.profileSetup) {
             navigate("/chat");
@@ -323,7 +327,7 @@ const Auth = () => {
           </div>
           <div className="lg:h-[400px] md:h-[300px] mt-8 md:mt-0">
             <img
-              src="https://readymadeui.com/login-image.webp"
+              src={"/assets/login.png"}
               className="w-full h-full object-cover hidden md:block"
               alt="Dining Experience"
             />
