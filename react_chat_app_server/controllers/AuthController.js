@@ -94,3 +94,27 @@ export const login = async (request, response, next) => {
     next(error);
   }
 };
+
+export const getUserInfo = async (request, response, next) => {
+  try {
+    const userData = await User.findById(request.userId);
+    if (!userData) {
+      return next(errorHandler(404, "User not found"));
+    }
+
+    response.status(200).json({
+      message: "User info",
+      userData: {
+        id: userData._id,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        image: userData.image,
+        color: userData.color,
+        profileSetup: userData.profileSetup,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
