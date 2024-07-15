@@ -120,7 +120,7 @@ const Auth = () => {
 
   return (
     <div className="container h-screen flex justify-center items-center px-4">
-      <div className="flex flex-col items-center justify-center h-[80vh] w-full max-w-4xl shadow-xl rounded-3xl p-5">
+      <div className="flex flex-col items-center justify-center h-auto w-full max-w-4xl shadow-xl rounded-3xl p-5">
         <div className="flex flex-col justify-center items-center gap-3 my-4">
           <h1 className="text-xl md:text-3xl font-bold">
             Welcome to the Chat Application
@@ -186,7 +186,7 @@ const Auth = () => {
                         name="password"
                         type="password"
                         required
-                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600"
+                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
                         placeholder="Enter password"
                         onChange={(e) => {
                           setPassword(e.target.value);
@@ -211,7 +211,7 @@ const Auth = () => {
                         name="confirmPassword"
                         type="password"
                         required
-                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600"
+                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
                         placeholder="Confirm password"
                         onChange={(e) => {
                           setConfirmPassword(e.target.value);
@@ -261,7 +261,7 @@ const Auth = () => {
                         name="email"
                         type="email"
                         required
-                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600"
+                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
                         placeholder="Enter your Email Address"
                         onChange={(e) => {
                           setEmail(e.target.value);
@@ -286,7 +286,7 @@ const Auth = () => {
                         name="password"
                         type="password"
                         required
-                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600"
+                        className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
                         placeholder="Enter password"
                         onChange={(e) => {
                           setPassword(e.target.value);
