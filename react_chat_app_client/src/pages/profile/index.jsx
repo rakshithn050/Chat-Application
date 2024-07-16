@@ -1,18 +1,21 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/store";
-import { Lock, Mail, MoveLeft, XCircle } from "lucide-react";
+import { apiClient } from "../../../lib/api-client.js";
+import { MoveLeft, XCircle } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { UPDATE_USER_PROFILE } from "../../../utils/constants.js";
 
 const Profile = () => {
   const { userInfo } = useAppStore();
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    firstName: null,
-    lastName: null,
-    image: null,
+    firstName: userInfo.userData?.firstName ? userInfo.userData.firstName : "",
+    lastName: userInfo.userData?.lastName ? userInfo.userData.lastName : "",
+    image: userInfo.userData?.image ? userInfo.userData.image : null,
   });
   const [colors, setColors] = useState([
     "#FEB2B2",
@@ -21,7 +24,11 @@ const Profile = () => {
     "#FEFCBF",
     "#FBD38D",
   ]);
-  const [selectedColor, setSelectedColor] = useState("#BFDBFE");
+  const [selectedColor, setSelectedColor] = useState(
+    userInfo.userData?.color ? userInfo.userData.color : "#BFDBFE"
+  );
+  const [firstNameError, setFirstNameError] = useState("");
+  const [lastNameError, setLastNameError] = useState("");
   const fileInput = useRef();
 
   const handleImageUpload = (event) => {
@@ -39,11 +46,47 @@ const Profile = () => {
     setUserData((prevData) => ({ ...prevData, image: null }));
   };
 
-  const saveProfile = async () => {
+  const handleValidation = () => {
+    let isValid = true;
+    if (!userData.firstName.trim()) {
+      setFirstNameError("First name is required");
+      isValid = false;
+    } else {
+      setFirstNameError("");
+    }
+    if (!userData.lastName.trim()) {
+      setLastNameError("Last name is required");
+      isValid = false;
+    } else {
+      setLastNameError("");
+    }
+    return isValid;
+  };
+
+  const saveProfile = async (e) => {
+    e.preventDefault();
     try {
-      // Save profile logic here
+      if (handleValidation()) {
+        const firstName = userData.firstName.trim();
+        const lastName = userData.lastName.trim();
+        const response = await apiClient.put(
+          UPDATE_USER_PROFILE,
+          { firstName, lastName, color: selectedColor },
+          { withCredentials: true }
+        );
+        if (response.status === 201) {
+          toast.success("Profile Updated Successfully");
+        }
+        setTimeout(() => {
+          navigate("/chat");
+        }, 2000);
+      }
     } catch (error) {
-      console.log(error);
+      toast.error(
+        `Could not update your profile. ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   };
 
@@ -82,27 +125,26 @@ const Profile = () => {
                     }}
                   />
                 ) : (
-                  <>
-                    <div
-                      className="text-3xl font-bold cursor-pointer h-full w-full flex justify-center items-center"
-                      style={{
-                        backgroundColor: selectedColor,
-                      }}
-                      onClick={() => {
-                        fileInput.current.click();
-                      }}
-                    >
-                      {userData.firstName && userData.firstName !== ""
-                        ? userData?.firstName.charAt(0).toUpperCase()
-                        : userInfo?.userData?.email.charAt(0).toUpperCase()}
-                    </div>
-                  </>
+                  <div
+                    className="text-3xl font-bold cursor-pointer h-full w-full flex justify-center items-center"
+                    style={{
+                      backgroundColor: selectedColor,
+                    }}
+                    onClick={() => {
+                      fileInput.current.click();
+                    }}
+                  >
+                    {userData.firstName
+                      ? userData.firstName.charAt(0).toUpperCase()
+                      : userInfo?.userData?.email.charAt(0).toUpperCase()}
+                  </div>
                 )}
 
                 <input
                   type="file"
                   accept="image/*"
                   ref={fileInput}
+                  name="profileImage"
                   onChange={handleImageUpload}
                   className="absolute inset-0 opacity-0 cursor-pointer hidden"
                 />
@@ -148,12 +190,12 @@ const Profile = () => {
             </div>
           </div>
 
-          <form className="space-y-4 w-full">
+          <form className="space-y-4 w-full" onSubmit={saveProfile}>
             <Input
               type="text"
               placeholder="First Name"
               className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
-              value={userData.firstName || ""}
+              value={userData.firstName}
               onChange={(e) =>
                 setUserData((prevData) => ({
                   ...prevData,
@@ -161,11 +203,14 @@ const Profile = () => {
                 }))
               }
             />
+            {firstNameError && (
+              <p className="text-red-500 text-sm">{firstNameError}</p>
+            )}
             <Input
               type="text"
               placeholder="Last Name"
               className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
-              value={userData.lastName || ""}
+              value={userData.lastName}
               onChange={(e) =>
                 setUserData((prevData) => ({
                   ...prevData,
@@ -173,6 +218,9 @@ const Profile = () => {
                 }))
               }
             />
+            {lastNameError && (
+              <p className="text-red-500 text-sm">{lastNameError}</p>
+            )}
             <Input
               type="email"
               placeholder="Email"
@@ -182,16 +230,18 @@ const Profile = () => {
             />
 
             <Button
-              type="button"
+              type="submit"
               className="text-white bg-[#007bff] hover:bg-blue-600 font-semibold rounded-md text-sm px-4 py-2.5 w-full"
-              onClick={saveProfile}
             >
               Update Profile
             </Button>
 
-            <button className="border border-red-600 text-red-600 px-4 py-2 rounded hover:bg-red-500 hover:text-white w-full">
+            {/* <button
+              className="border border-red-600 text-red-600 px-4 py-2 rounded hover:bg-red-500 hover:text-white w-full"
+              // onClick={deleteProfile}
+            >
               Delete Profile
-            </button>
+            </button> */}
           </form>
         </div>
       </div>

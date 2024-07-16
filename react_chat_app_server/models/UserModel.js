@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema(
         "https://img.freepik.com/premium-vector/man-avatar-profile-picture-vector-illustration_268834-538.jpg",
     },
     color: {
-      type: Number,
+      type: String,
       required: false,
     },
     profileSetup: {

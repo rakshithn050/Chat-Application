@@ -158,8 +158,8 @@ export const updateUserProfile = async (request, response, next) => {
       return next(errorHandler(404, "User not found"));
     }
 
-    return response.status(200).json({
-      message: "User info updated successfully",
+    return response.status(201).json({
+      message: "User profile updated successfully",
       userData: {
         id: userData._id,
         email: userData.email,
