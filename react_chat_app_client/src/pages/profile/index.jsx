@@ -7,10 +7,13 @@ import { MoveLeft, XCircle } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { UPDATE_USER_PROFILE } from "../../../utils/constants.js";
+import {
+  ADD_PROFILE_IMAGE,
+  UPDATE_USER_PROFILE,
+} from "../../../utils/constants.js";
 
 const Profile = () => {
-  const { userInfo } = useAppStore();
+  const { userInfo, setUserInfo } = useAppStore();
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
     firstName: userInfo.userData?.firstName ? userInfo.userData.firstName : "",
@@ -31,7 +34,7 @@ const Profile = () => {
   const [lastNameError, setLastNameError] = useState("");
   const fileInput = useRef();
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -39,6 +42,29 @@ const Profile = () => {
         setUserData((prevData) => ({ ...prevData, image: reader.result }));
       };
       reader.readAsDataURL(file);
+
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      try {
+        const response = await apiClient.post(ADD_PROFILE_IMAGE, formData, {
+          withCredentials: true,
+        });
+
+        if (response.status === 200) {
+          setUserInfo((prevData) => ({
+            ...prevData,
+            image: response.data.image,
+          }));
+          toast.success("Profile Image Added Successfully");
+        }
+      } catch (error) {
+        toast.error(
+          `Could not upload the image. ${
+            error.response?.data?.message || error.message
+          }`
+        );
+      }
     }
   };
 

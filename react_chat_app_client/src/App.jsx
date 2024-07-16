@@ -53,7 +53,7 @@ function App() {
         throw new Error(`Failed to fetch user data: ${response.statusText}`);
       }
 
-      return response.data;
+      return response.data.userData;
     } catch (error) {
       console.error("Error fetching user data:", error);
       throw error;
