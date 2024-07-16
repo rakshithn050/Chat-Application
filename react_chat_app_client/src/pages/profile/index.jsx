@@ -1,28 +1,28 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAppStore } from "@/store";
 import { Lock, Mail, MoveLeft, XCircle } from "lucide-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { userInfo } = useAppStore();
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    firstName: "",
-    lastName: "",
-    image: "",
+    firstName: null,
+    lastName: null,
+    image: null,
   });
   const [colors, setColors] = useState([
-    "red-200",
-    "blue-200",
-    "green-200",
-    "yellow-200",
-    "orange-200",
+    "#FEB2B2",
+    "#BFDBFE",
+    "#C6F6D5",
+    "#FEFCBF",
+    "#FBD38D",
   ]);
-  const [selectedColor, setSelectedColor] = useState("blue-200");
+  const [selectedColor, setSelectedColor] = useState("#BFDBFE");
+  const fileInput = useRef();
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -36,7 +36,7 @@ const Profile = () => {
   };
 
   const removeImage = () => {
-    setUserData((prevData) => ({ ...prevData, image: "" }));
+    setUserData((prevData) => ({ ...prevData, image: null }));
   };
 
   const saveProfile = async () => {
@@ -65,47 +65,63 @@ const Profile = () => {
         </h1>
         <div className="grid sm:grid-cols-2 items-center gap-8 p-4">
           <div className="flex flex-col justify-center items-center gap-5">
-            <div className="relative">
+            <div className="relative group">
               <Avatar
-                className={`relative flex items-center justify-center h-40 w-40 outline outline-offset-2 outline-${selectedColor}`}
+                className="relative flex items-center justify-center h-40 w-40"
+                style={{
+                  outline: `2px solid ${selectedColor}`,
+                  outlineOffset: "2px",
+                }}
               >
                 {userData.image ? (
-                  <AvatarImage src={userData.image} />
+                  <AvatarImage
+                    src={userData.image}
+                    className="cursor-pointer group-hover:opacity-25"
+                    onClick={() => {
+                      fileInput.current.click();
+                    }}
+                  />
                 ) : (
-                  <AvatarFallback className="text-3xl font-bold">
-                    {userData.firstName && userData.firstName !== ""
-                      ? userData?.firstName.charAt(0)
-                      : userInfo?.userData?.email.charAt(0)}
-                  </AvatarFallback>
+                  <>
+                    <div
+                      className="text-3xl font-bold cursor-pointer h-full w-full flex justify-center items-center"
+                      style={{
+                        backgroundColor: selectedColor,
+                      }}
+                      onClick={() => {
+                        fileInput.current.click();
+                      }}
+                    >
+                      {userData.firstName && userData.firstName !== ""
+                        ? userData?.firstName.charAt(0).toUpperCase()
+                        : userInfo?.userData?.email.charAt(0).toUpperCase()}
+                    </div>
+                  </>
                 )}
-                {userData.image && (
-                  <button
-                    className="absolute inset-0 flex items-center justify-center text-red-600 hover:text-red-800 opacity-0 hover:opacity-100"
-                    onClick={removeImage}
-                  >
-                    <XCircle className="w-6 h-6" />
-                    Remove Image
-                  </button>
-                )}
+
                 <input
                   type="file"
                   accept="image/*"
+                  ref={fileInput}
                   onChange={handleImageUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="absolute inset-0 opacity-0 cursor-pointer hidden"
                 />
               </Avatar>
+
+              {userData.image && (
+                <div
+                  onClick={removeImage}
+                  className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <button className="text-red-600 hover:text-red-800">
+                    <XCircle className="w-6 h-6 mx-auto" />
+                    Remove Image
+                  </button>
+                </div>
+              )}
             </div>
-            {userData.image && (
-              <button
-                className="mt-2 text-red-600 hover:text-red-800"
-                onClick={removeImage}
-              >
-                <XCircle className="w-6 h-6" />
-                Remove Image
-              </button>
-            )}
             <p className="text-center text-gray-600">
-              Customize Your Profile Color
+              Customize Your Profile Color & Profile Image
             </p>
             <div className="flex gap-4 flex-wrap justify-center">
               {colors.map((profileColor, index) => (
@@ -114,11 +130,19 @@ const Profile = () => {
                   onClick={() => {
                     setSelectedColor(profileColor);
                   }}
-                  className={`bg-${profileColor} h-8 w-8 cursor-pointer rounded-full transition-all duration-300 ${
-                    selectedColor === profileColor
-                      ? `outline outline-3 outline-${profileColor} outline-offset-2`
-                      : "outline-none"
-                  }`}
+                  style={{
+                    backgroundColor: profileColor,
+                    height: "2rem",
+                    width: "2rem",
+                    cursor: "pointer",
+                    borderRadius: "50%",
+                    transition: "all 0.3s",
+                    outline:
+                      selectedColor === profileColor
+                        ? `3px solid ${profileColor}`
+                        : "none",
+                    outlineOffset: "2px",
+                  }}
                 ></div>
               ))}
             </div>
@@ -129,7 +153,7 @@ const Profile = () => {
               type="text"
               placeholder="First Name"
               className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
-              value={userData.firstName}
+              value={userData.firstName || ""}
               onChange={(e) =>
                 setUserData((prevData) => ({
                   ...prevData,
@@ -141,7 +165,7 @@ const Profile = () => {
               type="text"
               placeholder="Last Name"
               className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
-              value={userData.lastName}
+              value={userData.lastName || ""}
               onChange={(e) =>
                 setUserData((prevData) => ({
                   ...prevData,
@@ -152,8 +176,8 @@ const Profile = () => {
             <Input
               type="email"
               placeholder="Email"
-              className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
-              value={userInfo.email}
+              className="w-full text-sm text-gray-800 bg-gray-200 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
+              value={userInfo?.userData?.email}
               readOnly
             />
 

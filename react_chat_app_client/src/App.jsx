@@ -6,6 +6,7 @@ import { useAppStore } from "./store";
 import { useEffect, useState } from "react";
 import { apiClient } from "../lib/api-client.js";
 import { GET_USER_INFO } from "../utils/constants.js";
+import Loader from "./components/ui/loader";
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
@@ -62,7 +63,9 @@ function App() {
   return (
     <>
       {loading ? (
-        "Please Wait!! Loading..."
+        <div className="h-screen w-screen flex justify-center items-center">
+          <Loader />
+        </div>
       ) : (
         <BrowserRouter>
           <Routes>
