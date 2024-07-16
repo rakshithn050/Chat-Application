@@ -97,13 +97,69 @@ export const login = async (request, response, next) => {
 
 export const getUserInfo = async (request, response, next) => {
   try {
-    const userData = await User.findById(request.userId);
+    const { userId } = request;
+    if (!userId) {
+      return next(errorHandler(400, "You are not allowed to get this data."));
+    }
+    const userData = await User.findById(userId);
     if (!userData) {
       return next(errorHandler(404, "User not found"));
     }
 
-    response.status(200).json({
+    return response.status(200).json({
       message: "User info",
+      userData: {
+        id: userData._id,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        image: userData.image,
+        color: userData.color,
+        profileSetup: userData.profileSetup,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserProfile = async (request, response, next) => {
+  try {
+    const { userId } = request;
+    const { firstName, lastName, color } = request.body;
+
+    if (!firstName || !lastName || !color) {
+      return next(
+        errorHandler(
+          400,
+          "First name, last name, and color fields are required"
+        )
+      );
+    }
+
+    if (!userId) {
+      return next(
+        errorHandler(400, "You are not allowed to update this profile.")
+      );
+    }
+
+    const userData = await User.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        color,
+        profileSetup: true,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!userData) {
+      return next(errorHandler(404, "User not found"));
+    }
+
+    return response.status(200).json({
+      message: "User info updated successfully",
       userData: {
         id: userData._id,
         email: userData.email,
