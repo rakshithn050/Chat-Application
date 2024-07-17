@@ -2,6 +2,13 @@ import { compare } from "bcrypt";
 import User from "../models/UserModel.js";
 import { errorHandler } from "../utils/ErrorHandler.js";
 import jwt from "jsonwebtoken";
+import { renameSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Get the current file path and directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const expiryDuration = 3 * 24 * 60 * 60 * 1000;
 const generateToken = (email, userID) => {
@@ -150,6 +157,95 @@ export const updateUserProfile = async (request, response, next) => {
         lastName,
         color,
         profileSetup: true,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!userData) {
+      return next(errorHandler(404, "User not found"));
+    }
+
+    return response.status(201).json({
+      message: "User profile updated successfully",
+      userData: {
+        id: userData._id,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        image: userData.image,
+        color: userData.color,
+        profileSetup: userData.profileSetup,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addUserProfileImage = async (request, response, next) => {
+  try {
+    const { userId } = request;
+
+    if (!userId) {
+      return next(
+        errorHandler(400, "You are not allowed to update this profile.")
+      );
+    }
+
+    if (!request.file) {
+      return next(errorHandler(400, "Profile Image is Missing."));
+    }
+
+    const date = Date.now();
+    const fileName = `uploads/profiles/${date}${request.file.originalname
+      .split(" ")
+      .join("_")}`;
+    const filePath = path.join(__dirname, fileName);
+
+    // Rename the file
+    renameSync(path.normalize(request.file.path), path.normalize(fileName));
+
+    const userData = await User.findByIdAndUpdate(
+      userId,
+      {
+        image: fileName,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!userData) {
+      return next(errorHandler(404, "User not found"));
+    }
+
+    return response.status(201).json({
+      message: "User profile image updated successfully",
+      userData: {
+        image: userData.image,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUserProfileImage = async (request, response, next) => {
+  try {
+    const { userId, profileImage } = request;
+
+    if (!userId) {
+      return next(
+        errorHandler(400, "You are not allowed to update this profile.")
+      );
+    }
+
+    if (!request.file) {
+      return next(errorHandler(400, "Profile Image is Missing."));
+    }
+
+    const userData = await User.findByIdAndUpdate(
+      userId,
+      {
+        image: profileImage,
       },
       { new: true, runValidators: true }
     );

@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   ADD_PROFILE_IMAGE,
+  HOST,
   UPDATE_USER_PROFILE,
 } from "../../../utils/constants.js";
 
@@ -70,6 +71,7 @@ const Profile = () => {
 
   const removeImage = () => {
     setUserData((prevData) => ({ ...prevData, image: null }));
+    setUserInfo((prevData) => ({ ...prevData, image: null }));
   };
 
   const handleValidation = () => {
@@ -142,9 +144,13 @@ const Profile = () => {
                   outlineOffset: "2px",
                 }}
               >
-                {userData.image ? (
+                {userData.image || userInfo.image ? (
                   <AvatarImage
-                    src={userData.image}
+                    src={
+                      userData.image
+                        ? userData.image
+                        : `${HOST}/${userInfo.image}`
+                    }
                     className="cursor-pointer group-hover:opacity-25"
                     onClick={() => {
                       fileInput.current.click();
@@ -176,7 +182,7 @@ const Profile = () => {
                 />
               </Avatar>
 
-              {userData.image && (
+              {(userData.image || userInfo.image) && (
                 <div
                   onClick={removeImage}
                   className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
