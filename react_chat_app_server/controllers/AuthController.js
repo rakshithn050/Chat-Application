@@ -2,7 +2,7 @@ import { compare } from "bcrypt";
 import User from "../models/UserModel.js";
 import { errorHandler } from "../utils/ErrorHandler.js";
 import jwt from "jsonwebtoken";
-import { renameSync } from "fs";
+import { renameSync, unlinkSync, existsSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -202,7 +202,6 @@ export const addUserProfileImage = async (request, response, next) => {
       .join("_")}`;
     const filePath = path.join(__dirname, fileName);
 
-    // Rename the file
     renameSync(path.normalize(request.file.path), path.normalize(fileName));
 
     const userData = await User.findByIdAndUpdate(
@@ -230,7 +229,7 @@ export const addUserProfileImage = async (request, response, next) => {
 
 export const deleteUserProfileImage = async (request, response, next) => {
   try {
-    const { userId, profileImage } = request;
+    const { userId } = request;
 
     if (!userId) {
       return next(
@@ -238,24 +237,21 @@ export const deleteUserProfileImage = async (request, response, next) => {
       );
     }
 
-    if (!request.file) {
-      return next(errorHandler(400, "Profile Image is Missing."));
-    }
-
-    const userData = await User.findByIdAndUpdate(
-      userId,
-      {
-        image: profileImage,
-      },
-      { new: true, runValidators: true }
-    );
+    const userData = await User.findById(userId);
 
     if (!userData) {
-      return next(errorHandler(404, "User not found"));
+      return next(errorHandler(404, "User does not exist"));
     }
 
-    return response.status(201).json({
-      message: "User profile updated successfully",
+    if (existsSync(userData.image)) {
+      unlinkSync(userData.image);
+    }
+
+    userData.image = "";
+    await userData.save();
+
+    return response.status(200).json({
+      message: "User profile image deleted successfully",
       userData: {
         id: userData._id,
         email: userData.email,

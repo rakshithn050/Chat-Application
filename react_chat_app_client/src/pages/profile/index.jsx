@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   ADD_PROFILE_IMAGE,
+  DELETE_PROFILE_IMAGE,
   HOST,
   UPDATE_USER_PROFILE,
 } from "../../../utils/constants.js";
@@ -17,9 +18,9 @@ const Profile = () => {
   const { userInfo, setUserInfo } = useAppStore();
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    firstName: userInfo.userData?.firstName ? userInfo.userData.firstName : "",
-    lastName: userInfo.userData?.lastName ? userInfo.userData.lastName : "",
-    image: userInfo.userData?.image ? userInfo.userData.image : null,
+    firstName: userInfo?.firstName ? userInfo.firstName : "",
+    lastName: userInfo?.lastName ? userInfo.lastName : "",
+    image: userInfo?.image ? userInfo.image : null,
   });
   const [colors, setColors] = useState([
     "#FEB2B2",
@@ -29,7 +30,7 @@ const Profile = () => {
     "#FBD38D",
   ]);
   const [selectedColor, setSelectedColor] = useState(
-    userInfo.userData?.color ? userInfo.userData.color : "#BFDBFE"
+    userInfo?.color ? userInfo.color : "#BFDBFE"
   );
   const [firstNameError, setFirstNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
@@ -69,9 +70,25 @@ const Profile = () => {
     }
   };
 
-  const removeImage = () => {
-    setUserData((prevData) => ({ ...prevData, image: null }));
-    setUserInfo((prevData) => ({ ...prevData, image: null }));
+  const removeImage = async () => {
+    try {
+      const response = await apiClient.delete(DELETE_PROFILE_IMAGE, {
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        setUserData((prevData) => ({ ...prevData, image: null }));
+        setUserInfo((prevData) => ({ ...prevData, image: null }));
+
+        toast.success("Profile Image Deleted Successfully");
+      }
+    } catch (error) {
+      toast.error(
+        `Could not delete the image. ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
   };
 
   const handleValidation = () => {
@@ -166,9 +183,9 @@ const Profile = () => {
                       fileInput.current.click();
                     }}
                   >
-                    {userData.firstName
+                    {userData.firstName && userData.firstName !== ""
                       ? userData.firstName.charAt(0).toUpperCase()
-                      : userInfo?.userData?.email.charAt(0).toUpperCase()}
+                      : userInfo?.email.charAt(0).toUpperCase()}
                   </div>
                 )}
 
@@ -257,7 +274,7 @@ const Profile = () => {
               type="email"
               placeholder="Email"
               className="w-full text-sm text-gray-800 bg-gray-200 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600 focus:border-none focus-visible:ring-1"
-              value={userInfo?.userData?.email}
+              value={userInfo?.email}
               readOnly
             />
 
