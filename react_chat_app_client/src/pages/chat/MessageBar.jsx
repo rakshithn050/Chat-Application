@@ -6,6 +6,7 @@ const MessageBar = () => {
   const [message, setMessage] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef();
+  const emojiButtonRef = useRef();
 
   const handleAddEmoji = (emojiData) => {
     setMessage((prev) => prev + emojiData.emoji);
@@ -18,17 +19,25 @@ const MessageBar = () => {
     }
   };
 
+  // Close emoji picker when clicking outside
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (emojiRef.current && !emojiRef.current.contains(event.target)) {
+    const handleClickOutside = (event) => {
+      if (
+        emojiPickerOpen &&
+        emojiRef.current &&
+        emojiButtonRef.current &&
+        !emojiRef.current.contains(event.target) &&
+        !emojiButtonRef.current.contains(event.target)
+      ) {
         setEmojiPickerOpen(false);
       }
-    }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [emojiRef]);
+  }, [emojiPickerOpen]);
 
   return (
     <div className="h-[10vh] bg-gray-900 flex justify-center items-center px-4 md:px-8 mb-6 gap-4 md:gap-6">
@@ -45,10 +54,10 @@ const MessageBar = () => {
         <button className="text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all">
           <Paperclip className="text-xl md:text-2xl" />
         </button>
-        <div className="relative">
+        <div className="relative" ref={emojiRef}>
           <button
             className="text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all"
-            ref={emojiRef}
+            ref={emojiButtonRef}
             onClick={() => {
               setEmojiPickerOpen((prev) => !prev); // Toggle emoji picker
             }}

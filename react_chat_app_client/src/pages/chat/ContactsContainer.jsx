@@ -1,5 +1,6 @@
 import Title from "@/components/app/Title";
 import React from "react";
+import ProfileCard from "./ProfileCard";
 
 const ContactsContainer = () => {
   return (
@@ -17,6 +18,7 @@ const ContactsContainer = () => {
           <Title text={"Channels"} />
         </div>
       </div>
+      <ProfileCard />
     </div>
   );
 };
