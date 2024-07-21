@@ -23,8 +23,7 @@ const UserSchema = new mongoose.Schema(
     image: {
       type: String,
       required: false,
-      default:
-        "https://img.freepik.com/premium-vector/man-avatar-profile-picture-vector-illustration_268834-538.jpg",
+      default: "/public/assets/images/avatar.jpg",
     },
     color: {
       type: String,

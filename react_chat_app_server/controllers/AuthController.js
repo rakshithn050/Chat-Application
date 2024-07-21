@@ -40,6 +40,7 @@ export const signup = async (request, response, next) => {
       secure: true,
       maxAge: expiryDuration,
       sameSite: "None",
+      path: "/",
     });
 
     response.status(201).json({
@@ -83,6 +84,7 @@ export const login = async (request, response, next) => {
       secure: true,
       maxAge: expiryDuration,
       sameSite: "None",
+      path: "/",
     });
 
     response.status(200).json({
@@ -105,6 +107,7 @@ export const login = async (request, response, next) => {
 export const getUserInfo = async (request, response, next) => {
   try {
     const { userId } = request;
+
     if (!userId) {
       return next(errorHandler(400, "You are not allowed to get this data."));
     }
@@ -261,6 +264,23 @@ export const deleteUserProfileImage = async (request, response, next) => {
         color: userData.color,
         profileSetup: userData.profileSetup,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = (request, response, next) => {
+  try {
+    response.clearCookie("authToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      path: "/",
+    });
+
+    response.status(200).json({
+      message: "Logout successful",
     });
   } catch (error) {
     next(error);

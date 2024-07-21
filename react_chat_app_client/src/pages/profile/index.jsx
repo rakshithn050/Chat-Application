@@ -120,6 +120,7 @@ const Profile = () => {
           { withCredentials: true }
         );
         if (response.status === 201) {
+          setUserData((prevData) => ({ ...prevData, profileSetup: true }));
           toast.success("Profile Updated Successfully");
         }
         setTimeout(() => {
@@ -165,7 +166,7 @@ const Profile = () => {
                   <AvatarImage
                     src={
                       userData.image
-                        ? userData.image
+                        ? `${HOST}/${userData.image}`
                         : `${HOST}/${userInfo.image}`
                     }
                     className="cursor-pointer group-hover:opacity-25"

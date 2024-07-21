@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAppStore } from "@/store";
 import React from "react";
-import { HOST } from "../../../utils/constants.js";
+import { HOST, LOGOUT_ROUTE } from "../../../utils/constants.js";
 import {
   Tooltip,
   TooltipContent,
@@ -10,15 +10,47 @@ import {
 } from "@/components/ui/tooltip.jsx";
 import { LogOut, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { apiClient } from "../../../lib/api-client.js";
 
 const ProfileCard = () => {
-  const { userInfo } = useAppStore();
+  const { userInfo, setUserInfo } = useAppStore();
   const navigate = useNavigate();
+
+  function clearCookie(name, domain, path) {
+    document.cookie =
+      name +
+      "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=" +
+      path +
+      "; domain=" +
+      domain +
+      ";";
+  }
 
   const logout = async () => {
     try {
-      alert("h");
-    } catch (error) {}
+      const response = await apiClient.post(
+        LOGOUT_ROUTE,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Logged out Successfully");
+        setUserInfo(null);
+        // Usage
+        clearCookie("authToken");
+
+        setTimeout(() => {
+          navigate("/auth");
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
   };
 
   return (
