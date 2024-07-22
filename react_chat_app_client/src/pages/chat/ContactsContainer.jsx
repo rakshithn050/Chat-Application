@@ -1,6 +1,7 @@
 import Title from "@/components/app/Title";
 import React from "react";
 import ProfileCard from "./ProfileCard";
+import NewMessage from "./NewMessage";
 
 const ContactsContainer = () => {
   return (
@@ -11,6 +12,7 @@ const ContactsContainer = () => {
       <div className="my-5">
         <div className="flex items-center justify-between pr-10">
           <Title text={"Direct Messages"} />
+          <NewMessage />
         </div>
       </div>
       <div className="my-5">
