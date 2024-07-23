@@ -7,6 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import authRoutes from "./routes/AuthRoutes.js";
+import contactRoutes from "./routes/ContactsRoutes.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/contacts", contactRoutes);
 
 const server = app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);
