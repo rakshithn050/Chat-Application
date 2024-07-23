@@ -4,6 +4,6 @@ import { verifyAuthToken } from "../middlewares/AuthMiddleware.js";
 
 const router = Router();
 
-router.get("/getContacts", verifyAuthToken, getContacts);
+router.post("/getContacts", verifyAuthToken, getContacts);
 
 export default router;
