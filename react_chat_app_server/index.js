@@ -44,7 +44,7 @@ const server = app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);
 });
 
-setupSocket();
+setupSocket(server);
 
 mongoose
   .connect(DB_URL)
