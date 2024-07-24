@@ -1,5 +1,5 @@
 import { Server as SocketIOServer } from "socket.io";
-import Message from "./models/MessagesModel";
+import Message from "./models/MessagesModel.js";
 
 const setupSocket = (server) => {
   const io = new SocketIOServer(server, {
@@ -23,10 +23,16 @@ const setupSocket = (server) => {
   };
 
   const sendMessage = async (message) => {
-    const senderSocketId = userSocketMap.get(message.sender);
+    const senderSocketId = userSocketMap.get(message.sender.id);
     const recipientSocketId = userSocketMap.get(message.recipient);
-
-    const createdMessage = await Message.create(message);
+    console.log(message);
+    const createdMessage = await Message.create({
+      sender: message.sender.id,
+      recipient: message.recipient.id,
+      messageType: message.messageType,
+      content: message.content,
+      fileUrl: message.fileUrl,
+    });
 
     const messageData = await Message.findById(createdMessage._id)
       .populate("sender", "id email firstName lastName image color")
@@ -51,7 +57,7 @@ const setupSocket = (server) => {
       console.log("User not found");
     }
 
-    socket.on("sendMessage", () => sendMessage);
+    socket.on("sendMessage", (data) => sendMessage(data));
     socket.on("disconnect", () => handleDisconnect(socket));
   });
 };

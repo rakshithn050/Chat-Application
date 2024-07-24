@@ -1,12 +1,16 @@
+import { useSocket } from "@/context/SocketContext";
+import { useAppStore } from "@/store";
 import EmojiPicker from "emoji-picker-react";
 import { Paperclip, SendHorizontal, SmilePlus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 const MessageBar = () => {
   const [message, setMessage] = useState("");
+  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef();
   const emojiButtonRef = useRef();
+  const socket = useSocket();
 
   const handleAddEmoji = (emojiData) => {
     setMessage((prev) => prev + emojiData.emoji);
@@ -14,8 +18,16 @@ const MessageBar = () => {
 
   const handleSendMessage = async () => {
     if (message.trim()) {
-      console.log("Message sent:", message);
-      setMessage("");
+      if (selectedChatType === "contact") {
+        socket.emit("sendMessage", {
+          sender: userInfo,
+          content: message,
+          recipient: selectedChatData._id,
+          messageType: "text",
+          fileUrl: undefined,
+        });
+        setMessage("");
+      }
     }
   };
 
