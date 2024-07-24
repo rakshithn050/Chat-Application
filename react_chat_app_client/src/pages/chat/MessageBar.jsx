@@ -6,7 +6,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 const MessageBar = () => {
   const [message, setMessage] = useState("");
-  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
+  const { selectedChatType, selectedChatData, userInfo, addMessage } =
+    useAppStore();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef();
   const emojiButtonRef = useRef();
@@ -19,13 +20,18 @@ const MessageBar = () => {
   const handleSendMessage = async () => {
     if (message.trim()) {
       if (selectedChatType === "contact") {
-        socket.emit("sendMessage", {
+        const data = {
           sender: userInfo,
           content: message,
           recipient: selectedChatData._id,
           messageType: "text",
           fileUrl: undefined,
-        });
+        };
+
+        socket.emit("sendMessage", data);
+
+        addMessage(data);
+
         setMessage("");
       }
     }
