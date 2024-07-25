@@ -8,6 +8,6 @@ import { verifyAuthToken } from "../middlewares/AuthMiddleware.js";
 const router = Router();
 
 router.post("/getContacts", verifyAuthToken, getContacts);
-router.post("/getContactsForMessages", verifyAuthToken, getContactsForMessages);
+router.get("/getContactsForMessages", verifyAuthToken, getContactsForMessages);
 
 export default router;

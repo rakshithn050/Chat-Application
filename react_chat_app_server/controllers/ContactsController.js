@@ -37,7 +37,7 @@ export const getContacts = async (request, response, next) => {
 export const getContactsForMessages = async (request, response, next) => {
   try {
     let userId = request.userId;
-    userId = mongoose.Types.ObjectId(userId);
+    userId = new mongoose.Types.ObjectId(userId);
 
     const contacts = await Message.aggregate([
       {
@@ -50,14 +50,12 @@ export const getContactsForMessages = async (request, response, next) => {
         $group: {
           _id: {
             $cond: {
-              if: {
-                $eq: ["$sender", userId],
-                then: "$recipient",
-                else: "$sender",
-              },
+              if: { $eq: ["$sender", userId] },
+              then: "$recipient",
+              else: "$sender",
             },
           },
-          lastMessageTime: { $first: $timestamp },
+          lastMessageTime: { $first: "$timestamp" },
         },
       },
       {
@@ -83,7 +81,7 @@ export const getContactsForMessages = async (request, response, next) => {
       { $sort: { lastMessageTime: -1 } },
     ]);
 
-    return response.status(200).json(contacts);
+    return response.status(200).json({ contacts: contacts });
   } catch (error) {
     next(error);
   }

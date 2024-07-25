@@ -11,6 +11,7 @@ export const LOGOUT_ROUTE = `${AUTH_ROUTES}/logout`;
 
 export const CONTACTS_ROUTES = "/api/contacts";
 export const GET_CONTACTS = `${CONTACTS_ROUTES}/getContacts`;
+export const GET_CONTACTS_FOR_MESSAGES = `${CONTACTS_ROUTES}/getContactsForMessages`;
 
 export const MESSAGES_ROUTES = "/api/messages";
 export const GET_MESSAGES = `${MESSAGES_ROUTES}/getMessages`;
