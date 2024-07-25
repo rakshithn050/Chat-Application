@@ -3,6 +3,8 @@ import { useAppStore } from "@/store";
 import EmojiPicker from "emoji-picker-react";
 import { Paperclip, SendHorizontal, SmilePlus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { UPLOAD_FILE } from "../../../utils/constants";
+import { apiClient } from "../../../lib/api-client.js"; // Import apiClient
 
 const MessageBar = () => {
   const [message, setMessage] = useState("");
@@ -11,10 +13,48 @@ const MessageBar = () => {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef();
   const emojiButtonRef = useRef();
+  const uploadAttachmentRef = useRef();
   const socket = useSocket();
 
   const handleAddEmoji = (emojiData) => {
     setMessage((prev) => prev + emojiData.emoji);
+  };
+
+  const handleAttachmentLink = () => {
+    if (uploadAttachmentRef.current) {
+      uploadAttachmentRef.current.click();
+    }
+  };
+
+  const handleAttachmentChange = async (e) => {
+    try {
+      const file = e.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file); // Provide a key for the file
+
+        const response = await apiClient.post(UPLOAD_FILE, formData, {
+          withCredentials: true,
+        });
+
+        if (response.status === 200 && response.data) {
+          if (selectedChatType === "contact") {
+            const data = {
+              sender: userInfo,
+              content: undefined,
+              recipient: selectedChatData._id,
+              messageType: "file",
+              fileUrl: response.data.filePath,
+            };
+
+            socket.emit("sendMessage", data);
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      // Optionally provide user feedback here
+    }
   };
 
   const handleSendMessage = async () => {
@@ -55,7 +95,7 @@ const MessageBar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [emojiPickerOpen]);
+  }, [emojiPickerOpen, emojiRef, emojiButtonRef]); // Include refs in dependency array
 
   return (
     <div className="h-[10vh] bg-gray-900 flex justify-center items-center px-4 md:px-8 mb-6 gap-4 md:gap-6">
@@ -69,9 +109,18 @@ const MessageBar = () => {
             setMessage(e.target.value);
           }}
         />
-        <button className="text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all">
+        <button
+          className="text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all"
+          onClick={handleAttachmentLink}
+        >
           <Paperclip className="text-xl md:text-2xl" />
         </button>
+        <input
+          type="file"
+          className="hidden"
+          ref={uploadAttachmentRef}
+          onChange={handleAttachmentChange}
+        />
         <div className="relative" ref={emojiRef}>
           <button
             className="text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all"

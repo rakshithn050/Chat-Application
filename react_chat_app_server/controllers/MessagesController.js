@@ -47,18 +47,16 @@ export const uploadFile = async (request, response, next) => {
     }
 
     const date = Date.now();
-    const fileName = `uploads/files/${date}_${request.file.originalname
+    const fileName = `../uploads/files/${date}_${request.file.originalname
       .split(" ")
       .join("_")}`;
     const filePath = path.join(__dirname, fileName);
     const dirPath = path.dirname(filePath);
 
-    // Check if the directory exists, if not, create it
     if (!existsSync(dirPath)) {
       mkdirSync(dirPath, { recursive: true });
     }
 
-    // Move the file to the new location
     renameSync(path.normalize(request.file.path), path.normalize(filePath));
 
     return response.status(201).json({
