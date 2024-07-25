@@ -1,29 +1,44 @@
 import { useAppStore } from "@/store";
+import { apiClient } from "../../../lib/api-client.js";
 import moment from "moment";
 import React, { useEffect, useRef } from "react";
+import { GET_MESSAGES } from "../../../utils/constants.js";
 
 const MessageContainer = () => {
-  const { selectedChatData, selectedChatType, selectedChatMessages, userInfo } =
-    useAppStore();
+  const {
+    selectedChatData,
+    selectedChatType,
+    selectedChatMessages,
+    userInfo,
+    setSelectedChatMessages,
+  } = useAppStore();
   const scrollRef = useRef();
 
   const renderMessages = () => {
     let lastDate = null;
-    return selectedChatMessages.map((message, index) => {
-      const messageDate = moment(message.timestamp).format("YYYY-MM-DD");
-      const showDate = messageDate !== lastDate;
-      lastDate = messageDate;
+    if (selectedChatMessages.length !== 0) {
+      return selectedChatMessages.map((message, index) => {
+        const messageDate = moment(message.timestamp).format("YYYY-MM-DD");
+        const showDate = messageDate !== lastDate;
+        lastDate = messageDate;
+        return (
+          <div key={index}>
+            {showDate && (
+              <div className="text-center text-gray-500 my-4">
+                {moment(message.timestamp).format("LL")}
+              </div>
+            )}
+            {selectedChatType === "contact" && renderPersonalMessages(message)}
+          </div>
+        );
+      });
+    } else {
       return (
-        <div key={index}>
-          {showDate && (
-            <div className="text-center text-gray-500 my-4">
-              {moment(message.timestamp).format("LL")}
-            </div>
-          )}
-          {selectedChatType === "contact" && renderPersonalMessages(message)}
+        <div className="text-center text-gray-500 my-4">
+          No messages to display.
         </div>
       );
-    });
+    }
   };
 
   const renderPersonalMessages = (message) => (
@@ -52,6 +67,28 @@ const MessageContainer = () => {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [selectedChatMessages]);
+
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        const response = await apiClient.post(
+          GET_MESSAGES,
+          {
+            receiverId: selectedChatData._id,
+          },
+          { withCredentials: true }
+        );
+        if (response.status === 200) {
+          setSelectedChatMessages(response.data?.messages);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (selectedChatData._id) {
+      if (selectedChatType === "contact") getMessages();
+    }
+  }, [selectedChatData, selectedChatType, setSelectedChatMessages]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">

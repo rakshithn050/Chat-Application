@@ -25,10 +25,10 @@ const setupSocket = (server) => {
   const sendMessage = async (message) => {
     const senderSocketId = userSocketMap.get(message.sender.id);
     const recipientSocketId = userSocketMap.get(message.recipient);
-    console.log(message);
+    
     const createdMessage = await Message.create({
       sender: message.sender.id,
-      recipient: message.recipient.id,
+      recipient: message.recipient,
       messageType: message.messageType,
       content: message.content,
       fileUrl: message.fileUrl,

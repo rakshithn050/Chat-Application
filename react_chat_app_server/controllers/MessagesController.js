@@ -6,8 +6,10 @@ export const getMessages = async (request, response, next) => {
     const { receiverId } = request.body;
     const senderId = request.userId;
 
+    console.log(receiverId, senderId);
+
     if (!receiverId || !senderId) {
-      return next(errorHandler(404, "User does not exist"));
+      return next(errorHandler(404, "Sender ID and Receiver ID are required"));
     }
 
     const messages = await Message.find({
@@ -17,7 +19,7 @@ export const getMessages = async (request, response, next) => {
       ],
     }).sort({ timestamp: 1 });
 
-    return response.status(200).json(messages);
+    return response.status(200).json({ messages: messages });
   } catch (error) {
     next(error);
   }
