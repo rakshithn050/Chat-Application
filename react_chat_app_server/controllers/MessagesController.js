@@ -51,8 +51,8 @@ export const uploadFile = async (request, response, next) => {
       .split(" ")
       .join("_")}`;
 
-    const filePath = path.join(__dirname, "..", fileName);
-    const dirPath = path.dirname(filePath);
+    const filePath = path.normalize(path.join(__dirname, "..", fileName));
+    const dirPath = path.normalize(path.dirname(filePath));
 
     if (!existsSync(dirPath)) {
       mkdirSync(dirPath, { recursive: true });

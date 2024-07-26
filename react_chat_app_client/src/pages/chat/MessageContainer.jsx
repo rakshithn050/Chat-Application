@@ -1,8 +1,9 @@
 import { useAppStore } from "@/store";
 import { apiClient } from "../../../lib/api-client.js";
 import moment from "moment";
-import React, { useEffect, useRef } from "react";
-import { GET_MESSAGES } from "../../../utils/constants.js";
+import React, { useEffect, useRef, useState } from "react";
+import { GET_MESSAGES, HOST } from "../../../utils/constants.js";
+import { CircleX, Download, File } from "lucide-react";
 
 const MessageContainer = () => {
   const {
@@ -13,6 +14,38 @@ const MessageContainer = () => {
     setSelectedChatMessages,
   } = useAppStore();
   const scrollRef = useRef();
+
+  const [showImage, setShowImage] = useState(false);
+  const [imageURL, setImageURL] = useState(null);
+
+  const checkIfImage = (filePath) => {
+    const imageRegex =
+      /\.(jpg|jpeg|png|gif|bmp|tiff|tif|webp|svg|ico|heic|heif)$/i;
+
+    return imageRegex.test(filePath);
+  };
+
+  const handleDownloadFile = async (fileUrl) => {
+    try {
+      const response = await apiClient.get(
+        `${HOST}/${fileUrl}`,
+        {},
+        {
+          responseType: "blob",
+        }
+      );
+      const urlBlob = URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = urlBlob;
+      link.setAttribute("download", fileUrl.split("/").pop());
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(urlBlob);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const renderMessages = () => {
     let lastDate = null;
@@ -44,18 +77,64 @@ const MessageContainer = () => {
   const renderPersonalMessages = (message) => (
     <div
       className={`flex flex-col ${
-        message.sender === userInfo._id ? "items-end" : "items-start"
+        message.sender === userInfo.id ? "items-start" : "items-end"
       } my-2`}
     >
-      <div
-        className={`${
-          message.sender === userInfo._id
-            ? "bg-gray-600 text-white"
-            : "bg-purple-600 text-white"
-        } p-3 rounded-lg max-w-xs break-words`}
-      >
-        {message.messageType === "text" && <div>{message.content}</div>}
-      </div>
+      {message.messageType === "text" && (
+        <div
+          className={`${
+            message.sender === userInfo.id
+              ? "bg-gray-600 text-white"
+              : "bg-purple-600 text-white"
+          } p-3 rounded-lg max-w-xs break-words shadow-md`}
+        >
+          {message.content}
+        </div>
+      )}
+      {message.messageType === "file" && (
+        <div
+          className={`${
+            message.sender === userInfo.id
+              ? "bg-gray-600 text-white"
+              : "bg-purple-600 text-white"
+          } p-3 rounded-lg max-w-xs break-words shadow-md`}
+        >
+          {checkIfImage(message.fileUrl) ? (
+            <div
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => {
+                setShowImage(true);
+                setImageURL(message.fileUrl);
+              }}
+            >
+              <img
+                src={`${HOST}/${message.fileUrl}`}
+                className="object-cover h-48 w-72 rounded-md"
+                alt={message.fileUrl.split("/").pop()}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <File className="text-white" />
+              <a
+                href={`${HOST}/${message.fileUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white break-words"
+                style={{ wordBreak: "break-all" }}
+              >
+                {message.fileUrl.split("/").pop()}
+              </a>
+              <Download
+                className="text-white cursor-pointer"
+                onClick={() => {
+                  handleDownloadFile(message.fileUrl);
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
       <div className="text-xs text-gray-400 mt-1">
         {moment(message.timestamp).format("LT")}
       </div>
@@ -91,9 +170,39 @@ const MessageContainer = () => {
   }, [selectedChatData, selectedChatType, setSelectedChatMessages]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4">
       {renderMessages()}
       <div ref={scrollRef}></div>
+      {showImage && (
+        <div className="fixed mt-0 z-10 top-0 left-0 h-screen w-screen flex items-center justify-center backdrop-blur-lg flex-col">
+          <div>
+            <img
+              src={`${HOST}/${imageURL}`}
+              className="object-cover h-[80vh] w-full bg-cover rounded-md"
+              alt="image"
+            />
+          </div>
+          <div className="flex gap-5 fixed top-0 mt-5">
+            <button
+              className="bg-black/20 p-3 rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300"
+              onClick={() => {
+                handleDownloadFile(imageURL);
+              }}
+            >
+              <Download className="text-white cursor-pointer" />
+            </button>
+            <button
+              className="bg-black/20 p-3 rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300"
+              onClick={() => {
+                setShowImage(false);
+                setImageURL(null);
+              }}
+            >
+              <CircleX className="text-white cursor-pointer" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

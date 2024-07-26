@@ -29,9 +29,10 @@ const MessageBar = () => {
   const handleAttachmentChange = async (e) => {
     try {
       const file = e.target.files[0];
+      console.log(file);
       if (file) {
         const formData = new FormData();
-        formData.append("file", file); // Provide a key for the file
+        formData.append("file", file);
 
         const response = await apiClient.post(UPLOAD_FILE, formData, {
           withCredentials: true,
@@ -55,7 +56,6 @@ const MessageBar = () => {
       }
     } catch (error) {
       console.log(error);
-      // Optionally provide user feedback here
     }
   };
 
@@ -79,7 +79,6 @@ const MessageBar = () => {
     }
   };
 
-  // Close emoji picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
