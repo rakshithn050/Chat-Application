@@ -86,3 +86,20 @@ export const getContactsForMessages = async (request, response, next) => {
     next(error);
   }
 };
+
+export const getAllContacts = async (request, response, next) => {
+  try {
+    const users = await User.find(
+      { _id: { $ne: request.userId } },
+      "firstName lastName email _id"
+    );
+
+    const contacts = users.map((user) => ({
+      label: user.firstName ? `${user.firstName} ${user.lastName}` : user.email,
+    }));
+
+    return response.status(200).json({ contacts: contacts });
+  } catch (error) {
+    next(error);
+  }
+};
