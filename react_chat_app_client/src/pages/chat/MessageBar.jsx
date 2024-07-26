@@ -37,7 +37,7 @@ const MessageBar = () => {
           withCredentials: true,
         });
 
-        if (response.status === 200 && response.data) {
+        if (response.status === 201 && response.data) {
           if (selectedChatType === "contact") {
             const data = {
               sender: userInfo,
@@ -49,6 +49,8 @@ const MessageBar = () => {
 
             socket.emit("sendMessage", data);
           }
+        } else {
+          alert("no");
         }
       }
     } catch (error) {

@@ -47,10 +47,11 @@ export const uploadFile = async (request, response, next) => {
     }
 
     const date = Date.now();
-    const fileName = `../uploads/files/${date}_${request.file.originalname
+    const fileName = `uploads/files/${date}_${request.file.originalname
       .split(" ")
       .join("_")}`;
-    const filePath = path.join(__dirname, fileName);
+
+    const filePath = path.join(__dirname, "..", fileName);
     const dirPath = path.dirname(filePath);
 
     if (!existsSync(dirPath)) {
