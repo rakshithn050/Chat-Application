@@ -8,8 +8,15 @@ import { apiClient } from "../../../lib/api-client.js"; // Import apiClient
 
 const MessageBar = () => {
   const [message, setMessage] = useState("");
-  const { selectedChatType, selectedChatData, userInfo, addMessage } =
-    useAppStore();
+  const {
+    selectedChatType,
+    selectedChatData,
+    userInfo,
+    addMessage,
+    setIsUploading,
+    setFileUploadProgress,
+  } = useAppStore();
+
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const emojiRef = useRef();
   const emojiButtonRef = useRef();
@@ -33,12 +40,16 @@ const MessageBar = () => {
       if (file) {
         const formData = new FormData();
         formData.append("file", file);
-
+        setIsUploading(true);
         const response = await apiClient.post(UPLOAD_FILE, formData, {
           withCredentials: true,
+          onUploadProgress: (data) =>
+            setFileUploadProgress(Math.round((100 * data.loaded) / data.total)),
         });
 
         if (response.status === 201 && response.data) {
+          setIsUploading(false);
+
           if (selectedChatType === "contact") {
             const data = {
               sender: userInfo,
@@ -51,10 +62,12 @@ const MessageBar = () => {
             socket.emit("sendMessage", data);
           }
         } else {
-          alert("no");
+          console.log("Could not upload the file");
         }
       }
     } catch (error) {
+      setIsUploading(false);
+
       console.log(error);
     }
   };
