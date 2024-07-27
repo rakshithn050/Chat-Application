@@ -99,7 +99,6 @@ const Auth = () => {
       if (response.status === 200) {
         toast.success("Login Successful");
         setUserInfo(response?.data?.user);
-        console.log(response?.data?.user);
         resetForm();
         setTimeout(() => {
           if (response?.data?.user?.profileSetup) {

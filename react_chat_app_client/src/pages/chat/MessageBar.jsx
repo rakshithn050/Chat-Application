@@ -36,7 +36,6 @@ const MessageBar = () => {
   const handleAttachmentChange = async (e) => {
     try {
       const file = e.target.files[0];
-      console.log(file);
       if (file) {
         const formData = new FormData();
         formData.append("file", file);

@@ -9,7 +9,7 @@ import ContactList from "@/components/app/ContactList";
 import CreateChannel from "./CreateChannel";
 
 const ContactsContainer = () => {
-  const { messagedContacts, setMessagedContacts } = useAppStore();
+  const { messagedContacts, setMessagedContacts, channels } = useAppStore();
 
   useEffect(() => {
     getContacts();
@@ -34,14 +34,17 @@ const ContactsContainer = () => {
           <Title text={"Direct Messages"} />
           <NewMessage />
         </div>
-        <div className="max-h-[38vh] overflow-y-auto scrollbar-hidden">
+        {/* <div className="max-h-[38vh] overflow-y-auto scrollbar-hidden">
           <ContactList contacts={messagedContacts} />
-        </div>
+        </div> */}
       </div>
       <div className="my-5">
         <div className="flex items-center justify-between pr-10">
           <Title text={"Channels"} />
           <CreateChannel />
+        </div>
+        <div className="max-h-[38vh] overflow-y-auto scrollbar-hidden">
+          <ContactList contacts={channels} isChannel={true} />
         </div>
       </div>
       <ProfileCard />

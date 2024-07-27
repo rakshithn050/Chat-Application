@@ -22,7 +22,7 @@ const ContactList = ({ contacts, isChannel = false }) => {
   };
 
   return (
-    <div className="mt-5">
+    <div className="mt-5" data={console.log(contacts)}>
       {contacts.map((contact) => (
         <div
           key={contact._id}
@@ -69,37 +69,13 @@ const ContactList = ({ contacts, isChannel = false }) => {
             )}
             {isChannel && (
               <div className="flex gap-3 items-center justify-center">
-                <Avatar className="h-10 w-10 rounded-full overflow-hidden">
-                  {contact?.image ? (
-                    <AvatarImage
-                      src={`${HOST}/${contact.image}`}
-                      className="object-cover w-full h-full bg-black"
-                    />
-                  ) : (
-                    <AvatarFallback
-                      className="h-12 w-12 text-lg border-[1px] flex items-center justify-center"
-                      style={{
-                        outline: `2px solid ${contact?.color}`,
-                        outlineOffset: "2px",
-                      }}
-                    >
-                      {contact?.firstName
-                        ? contact?.firstName.charAt(0).toUpperCase()
-                        : contact?.email.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                {selectedChatType === "contact" ? (
-                  <div className="flex flex-col text-white font-semibold">
-                    <span>
-                      {selectedChatData?.firstName && selectedChatData?.lastName
-                        ? `${selectedChatData?.firstName} ${selectedChatData?.lastName}`
-                        : ""}
-                    </span>
-                  </div>
-                ) : (
-                  ""
-                )}
+                <div className="h-12 w-12 rounded-full text-lg border-[1px] flex items-center justify-center bg-purple-600 text-white">
+                  {contact?.name[0].toUpperCase() ?? contact?.name}
+                </div>
+                <div className="flex flex-col text-white font-semibold">
+                  <span>{contact?.name}</span>
+                  <span>{contact?.members?.length}</span>
+                </div>
               </div>
             )}
           </div>

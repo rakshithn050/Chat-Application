@@ -15,7 +15,7 @@ import {
 import { apiClient } from "../../../lib/api-client.js";
 import { MessageSquareDiff } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { GET_ALL_CONTACTS } from "../../../utils/constants.js";
+import { CREATE_CHANNEL, GET_ALL_CONTACTS } from "../../../utils/constants.js";
 import { useAppStore } from "@/store/index.js";
 import { Button } from "@/components/ui/button.jsx";
 import MultipleSelector from "@/components/ui/multiselect.jsx";
@@ -38,7 +38,8 @@ const CreateChannel = () => {
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [channelName, setChannelName] = useState([]);
 
-  const { setSelectedChatType, setSelectedChatData } = useAppStore();
+  const { setSelectedChatType, setSelectedChatData, addChannel } =
+    useAppStore();
 
   useEffect(() => {
     getContacts();
@@ -54,7 +55,28 @@ const CreateChannel = () => {
     }
   };
 
-  const CreateChannel = async () => {};
+  const createNewChannel = async () => {
+    try {
+      if (channelName.length > 0 && selectedContacts.length > 0) {
+        const response = await apiClient.post(
+          CREATE_CHANNEL,
+          {
+            name: channelName,
+            members: selectedContacts.map((contact) => contact.value),
+          },
+          { withCredentials: true }
+        );
+        if (response.status === 201) {
+          setChannelName("");
+          setSelectedContacts([]);
+          setOpenNewChannelModal(false);
+          addChannel(response.data.channel);
+        }
+      }
+    } catch (error) {
+      console.error("Something went wrong", error);
+    }
+  };
 
   return (
     <>
@@ -100,7 +122,10 @@ const CreateChannel = () => {
             />
           </div>
           <div>
-            <Button className="w-full bg-purple-600 hover:bg-purple-900 transition-all duration-300">
+            <Button
+              className="w-full bg-purple-600 hover:bg-purple-900 transition-all duration-300"
+              onClick={createNewChannel}
+            >
               Create Channel
             </Button>
           </div>
