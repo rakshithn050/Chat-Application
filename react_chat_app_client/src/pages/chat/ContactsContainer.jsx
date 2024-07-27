@@ -6,6 +6,7 @@ import { apiClient } from "../../../lib/api-client.js";
 import { GET_CONTACTS_FOR_MESSAGES } from "../../../utils/constants.js";
 import { useAppStore } from "@/store";
 import ContactList from "@/components/app/ContactList";
+import CreateChannel from "./CreateChannel";
 
 const ContactsContainer = () => {
   const { messagedContacts, setMessagedContacts } = useAppStore();
@@ -40,6 +41,7 @@ const ContactsContainer = () => {
       <div className="my-5">
         <div className="flex items-center justify-between pr-10">
           <Title text={"Channels"} />
+          <CreateChannel />
         </div>
       </div>
       <ProfileCard />
