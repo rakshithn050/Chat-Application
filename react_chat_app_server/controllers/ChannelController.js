@@ -36,3 +36,18 @@ export const createChannel = async (request, response, next) => {
     next(error);
   }
 };
+
+export const getPersonalizedChannels = async (request, response, next) => {
+  try {
+    let userId = request.userId;
+    userId = new mongoose.Types.ObjectId(userId);
+
+    const channels = await Channel.find({
+      $or: [{ admin: userId }, { members: userId }],
+    }).sort({ updatedAt: -1 });
+
+    return response.status(200).json({ channels });
+  } catch (error) {
+    next(error);
+  }
+};

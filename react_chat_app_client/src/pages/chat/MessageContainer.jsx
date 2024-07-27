@@ -4,6 +4,11 @@ import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import { GET_MESSAGES, HOST } from "../../../utils/constants.js";
 import { CircleX, Download, File } from "lucide-react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar.jsx";
 
 const MessageContainer = () => {
   const {
@@ -31,18 +36,14 @@ const MessageContainer = () => {
     setIsDownloading(true);
     setFileDownloadProgress(0);
     try {
-      const response = await apiClient.get(
-        `${HOST}/${fileUrl}`,
-        {},
-        {
-          responseType: "blob",
-          onDownloadProgress: (progress) => {
-            const { loaded, total } = progress;
-            const downloadProgress = Math.round((loaded * 100) / total);
-            setFileDownloadProgress(downloadProgress);
-          },
-        }
-      );
+      const response = await apiClient.get(`${HOST}/${fileUrl}`, {
+        responseType: "blob",
+        onDownloadProgress: (progress) => {
+          const { loaded, total } = progress;
+          const downloadProgress = Math.round((loaded * 100) / total);
+          setFileDownloadProgress(downloadProgress);
+        },
+      });
       const urlBlob = URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = urlBlob;
@@ -73,6 +74,7 @@ const MessageContainer = () => {
               </div>
             )}
             {selectedChatType === "contact" && renderPersonalMessages(message)}
+            {selectedChatType === "channel" && renderGroupMessages(message)}
           </div>
         );
       });
@@ -152,6 +154,63 @@ const MessageContainer = () => {
     </div>
   );
 
+  const renderGroupMessages = (message) => (
+    <div
+      className={`flex flex-col ${
+        message.sender.id === userInfo.id || message.sender._id === userInfo.id
+          ? "items-end"
+          : "items-start"
+      } my-2`}
+    >
+      {message.messageType === "text" && (
+        <div
+          className={`${
+            message.sender.id === userInfo.id ||
+            message.sender._id === userInfo.id
+              ? "bg-purple-600 text-white"
+              : "bg-gray-600 text-white"
+          } p-3 rounded-lg max-w-xs break-words shadow-md`}
+        >
+          {message.content}
+        </div>
+      )}
+      {message.sender.id !== userInfo.id &&
+        message.sender._id !== userInfo.id && (
+          <div className="flex items-center gap-3 mt-1">
+            <Avatar className="h-8 w-8 rounded-full overflow-hidden">
+              {message.sender?.image && (
+                <>
+                  <AvatarImage
+                    src={`${HOST}/${message.sender.image}`}
+                    className="object-cover w-full h-full bg-black"
+                  />
+                  <AvatarFallback
+                    className="h-8 w-8 text-lg border-[1px] flex items-center justify-center bg-gray-700 text-white"
+                    style={{
+                      outline: `2px solid ${message.sender?.color}`,
+                      outlineOffset: "2px",
+                    }}
+                  >
+                    {message.sender?.firstName
+                      ? message.sender?.firstName.charAt(0).toUpperCase()
+                      : message.sender?.email.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </>
+              )}
+            </Avatar>
+            <span className="text-sm text-white/60 truncate max-w-[150px]">
+              {message.sender?.firstName && message.sender?.lastName
+                ? `${message.sender?.firstName} ${message.sender?.lastName}`
+                : `${message.sender?.email}`}
+            </span>
+          </div>
+        )}
+      <div className="text-xs text-gray-400 mt-1">
+        {moment(message.createdAt).format("LT")}
+      </div>
+    </div>
+  );
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -175,8 +234,8 @@ const MessageContainer = () => {
         console.log(error);
       }
     };
-    if (selectedChatData._id) {
-      if (selectedChatType === "contact") getMessages();
+    if (selectedChatType === "contact" && selectedChatData?._id) {
+      getMessages();
     }
   }, [selectedChatData, selectedChatType, setSelectedChatMessages]);
 

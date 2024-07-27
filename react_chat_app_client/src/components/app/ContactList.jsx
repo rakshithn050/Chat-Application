@@ -13,8 +13,11 @@ const ContactList = ({ contacts, isChannel = false }) => {
   } = useAppStore();
 
   const handleClick = (contact) => {
-    if (isChannel) setSelectedChatType("channel");
-    setSelectedChatType("contact");
+    if (isChannel) {
+      setSelectedChatType("channel");
+    } else {
+      setSelectedChatType("contact");
+    }
     setSelectedChatData(contact);
     if (selectedChatData && selectedChatData._id !== contact._id) {
       setSelectedChatMessages([]);
@@ -22,7 +25,7 @@ const ContactList = ({ contacts, isChannel = false }) => {
   };
 
   return (
-    <div className="mt-5" data={console.log(contacts)}>
+    <div className="mt-5">
       {contacts.map((contact) => (
         <div
           key={contact._id}
@@ -53,8 +56,8 @@ const ContactList = ({ contacts, isChannel = false }) => {
                       }}
                     >
                       {contact?.firstName
-                        ? contact?.firstName.charAt(0).toUpperCase()
-                        : contact?.email.charAt(0).toUpperCase()}
+                        ? contact?.firstName?.charAt(0).toUpperCase()
+                        : contact?.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
@@ -68,13 +71,15 @@ const ContactList = ({ contacts, isChannel = false }) => {
               </div>
             )}
             {isChannel && (
-              <div className="flex gap-3 items-center justify-center">
-                <div className="h-12 w-12 rounded-full text-lg border-[1px] flex items-center justify-center bg-purple-600 text-white">
-                  {contact?.name[0].toUpperCase() ?? contact?.name}
+              <div className="flex gap-3 items-center justify-start">
+                <div className="h-10 w-10 rounded-full text-lg border border-gray-300 flex items-center justify-center bg-gray-600 text-white">
+                  #
                 </div>
-                <div className="flex flex-col text-white font-semibold">
+                <div className="flex justify-between gap-1 text-white">
                   <span>{contact?.name}</span>
-                  <span>{contact?.members?.length}</span>
+                  {/* <span className="bg-gray-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+                    {contact?.members?.length}
+                  </span> */}
                 </div>
               </div>
             )}

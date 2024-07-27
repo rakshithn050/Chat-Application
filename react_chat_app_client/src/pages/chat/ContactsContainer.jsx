@@ -3,16 +3,21 @@ import React, { useEffect } from "react";
 import ProfileCard from "./ProfileCard";
 import NewMessage from "./NewMessage";
 import { apiClient } from "../../../lib/api-client.js";
-import { GET_CONTACTS_FOR_MESSAGES } from "../../../utils/constants.js";
+import {
+  GET_CONTACTS_FOR_MESSAGES,
+  GET_PERSONALIZED_CHANNELS,
+} from "../../../utils/constants.js";
 import { useAppStore } from "@/store";
 import ContactList from "@/components/app/ContactList";
 import CreateChannel from "./CreateChannel";
 
 const ContactsContainer = () => {
-  const { messagedContacts, setMessagedContacts, channels } = useAppStore();
+  const { messagedContacts, setMessagedContacts, channels, setChannels } =
+    useAppStore();
 
   useEffect(() => {
     getContacts();
+    getChannels();
   }, []);
 
   const getContacts = async () => {
@@ -21,6 +26,15 @@ const ContactsContainer = () => {
     });
     if (response.status === 200) {
       setMessagedContacts(response.data?.contacts);
+    }
+  };
+
+  const getChannels = async () => {
+    const response = await apiClient.get(GET_PERSONALIZED_CHANNELS, {
+      withCredentials: true,
+    });
+    if (response.status === 200) {
+      setChannels(response.data?.channels);
     }
   };
 
@@ -34,9 +48,9 @@ const ContactsContainer = () => {
           <Title text={"Direct Messages"} />
           <NewMessage />
         </div>
-        {/* <div className="max-h-[38vh] overflow-y-auto scrollbar-hidden">
+        <div className="max-h-[38vh] overflow-y-auto scrollbar-hidden">
           <ContactList contacts={messagedContacts} />
-        </div> */}
+        </div>
       </div>
       <div className="my-5">
         <div className="flex items-center justify-between pr-10">

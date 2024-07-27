@@ -20,3 +20,4 @@ export const UPLOAD_FILE = `${MESSAGES_ROUTES}/uploadFile`;
 
 export const CHANNEL_ROUTES = "/api/channels";
 export const CREATE_CHANNEL = `${CHANNEL_ROUTES}/createChannel`;
+export const GET_PERSONALIZED_CHANNELS = `${CHANNEL_ROUTES}/getPersonalizedChannels`;

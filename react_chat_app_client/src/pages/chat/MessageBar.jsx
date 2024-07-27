@@ -59,6 +59,15 @@ const MessageBar = () => {
             };
 
             socket.emit("sendMessage", data);
+          } else if (selectedChatType === "channel") {
+            const data = {
+              sender: userInfo,
+              content: undefined,
+              channelId: selectedChatData._id,
+              messageType: "text",
+              fileUrl: response.data.filePath,
+            };
+            socket.emit("sendGroupMessage", data);
           }
         } else {
           console.log("Could not upload the file");
@@ -86,6 +95,16 @@ const MessageBar = () => {
 
         addMessage(data);
 
+        setMessage("");
+      } else if (selectedChatType === "channel") {
+        const data = {
+          sender: userInfo,
+          content: message,
+          channelId: selectedChatData._id,
+          messageType: "text",
+          fileUrl: undefined,
+        };
+        socket.emit("sendGroupMessage", data);
         setMessage("");
       }
     }
