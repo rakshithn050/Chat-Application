@@ -9,6 +9,7 @@ import { dirname } from "path";
 import authRoutes from "./routes/AuthRoutes.js";
 import contactRoutes from "./routes/ContactsRoutes.js";
 import messagesRoutes from "./routes/MessagesRoutes.js";
+import channelsRoutes from "./routes/ChannelsRoutes.js";
 import setupSocket from "./socket.js";
 
 dotenv.config();
@@ -45,6 +46,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/messages", messagesRoutes);
+app.use("/api/channels", channelsRoutes);
 
 const server = app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);
