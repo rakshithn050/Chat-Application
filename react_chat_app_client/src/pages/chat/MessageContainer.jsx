@@ -205,6 +205,50 @@ const MessageContainer = () => {
             </span>
           </div>
         )}
+      {message.messageType === "file" && (
+        <div
+          className={`${
+            message.sender === userInfo.id
+              ? "bg-gray-600 text-white"
+              : "bg-purple-600 text-white"
+          } p-3 rounded-lg max-w-xs break-words shadow-md`}
+        >
+          {checkIfImage(message.fileUrl) ? (
+            <div
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => {
+                setShowImage(true);
+                setImageURL(message.fileUrl);
+              }}
+            >
+              <img
+                src={`${HOST}/${message.fileUrl}`}
+                className="object-cover h-48 w-72 rounded-md"
+                alt={message.fileUrl.split("/").pop()}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <File className="text-white" />
+              <a
+                href={`${HOST}/${message.fileUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white break-words"
+                style={{ wordBreak: "break-all" }}
+              >
+                {message.fileUrl.split("/").pop()}
+              </a>
+              <Download
+                className="text-white cursor-pointer"
+                onClick={() => {
+                  handleDownloadFile(message.fileUrl);
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
       <div className="text-xs text-gray-400 mt-1">
         {moment(message.createdAt).format("LT")}
       </div>

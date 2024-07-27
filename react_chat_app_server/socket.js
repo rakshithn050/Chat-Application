@@ -31,7 +31,7 @@ const setupSocket = (server) => {
       sender: message.sender.id,
       recipient: message.recipient,
       messageType: message.messageType,
-      content: message.content,
+      content: message?.content || null,
       fileUrl: message.fileUrl,
     });
 
@@ -52,12 +52,12 @@ const setupSocket = (server) => {
     try {
       const senderSocketId = userSocketMap.get(message.sender.id);
       const channelId = message.channelId;
-      
+
       const createdMessage = await Message.create({
         sender: message.sender.id,
         recipient: null,
         messageType: message.messageType,
-        content: message.content,
+        content: message?.content || null,
         fileUrl: message.fileUrl,
       });
 
@@ -84,7 +84,7 @@ const setupSocket = (server) => {
         const adminSocketId = userSocketMap.get(
           channelData.admin._id.toString()
         );
-        
+
         if (adminSocketId) {
           io.to(adminSocketId).emit("receiveGroupMessage", finalData);
         }

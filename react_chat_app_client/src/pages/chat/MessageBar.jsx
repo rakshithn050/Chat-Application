@@ -64,7 +64,7 @@ const MessageBar = () => {
               sender: userInfo,
               content: undefined,
               channelId: selectedChatData._id,
-              messageType: "text",
+              messageType: "file",
               fileUrl: response.data.filePath,
             };
             socket.emit("sendGroupMessage", data);
