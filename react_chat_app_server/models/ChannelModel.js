@@ -21,8 +21,7 @@ const ChannelSchema = new mongoose.Schema(
     messages: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Message",
-        required: false,
+        ref: "Messages",
       },
     ],
   },

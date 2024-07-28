@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import User from "../models/UserModel.js";
 import Channel from "../models/ChannelModel.js";
+import Message from "../models/MessagesModel.js";
 import { errorHandler } from "../utils/ErrorHandler.js";
 
 export const createChannel = async (request, response, next) => {
@@ -47,6 +48,30 @@ export const getPersonalizedChannels = async (request, response, next) => {
     }).sort({ updatedAt: -1 });
 
     return response.status(200).json({ channels });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getChannelMessages = async (request, response, next) => {
+  try {
+    let { channelId } = request.params;
+
+    const channel = await Channel.findById(channelId).populate({
+      path: "messages",
+      populate: {
+        path: "sender",
+        select: "firstName lastName email _id image color",
+      },
+    });
+
+    if (!channel) {
+      return next(errorHandler(404, "Channel not found"));
+    }
+
+    const messages = channel.messages;
+
+    return response.status(200).json({ messages });
   } catch (error) {
     next(error);
   }

@@ -39,21 +39,21 @@ export const createChatSlice = (set, get) => ({
   },
   addMessage: (message) => {
     const selectedChatMessages = get().selectedChatMessages;
-    const selectedChatType = get().selectedChatType;
-
     set({
-      selectedChatMessages: [
-        ...selectedChatMessages,
-        {
-          ...message,
-          recipient:
-            selectedChatType === "channel"
-              ? message.recipient
-              : message.recipient,
-          sender:
-            selectedChatType === "channel" ? message.sender : message.sender.id,
-        },
-      ],
+      selectedChatMessages: [...selectedChatMessages, message],
     });
+  },
+  addChannelInChannelList: (message) => {
+    const channels = get().channels;
+    const index = channels.findIndex(
+      (channel) => channel._id === message.channelId
+    );
+    if (index !== -1) {
+      const [channel] = channels.splice(index, 1);
+      channels.unshift(channel);
+    } else {
+      channels.unshift({ _id: message.channelId });
+    }
+    set({ channels });
   },
 });

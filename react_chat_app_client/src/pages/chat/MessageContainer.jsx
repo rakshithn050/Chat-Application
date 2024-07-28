@@ -2,7 +2,11 @@ import { useAppStore } from "@/store";
 import { apiClient } from "../../../lib/api-client.js";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
-import { GET_MESSAGES, HOST } from "../../../utils/constants.js";
+import {
+  GET_CHANNEL_MESSAGES,
+  GET_MESSAGES,
+  HOST,
+} from "../../../utils/constants.js";
 import { CircleX, Download, File } from "lucide-react";
 import {
   Avatar,
@@ -278,8 +282,23 @@ const MessageContainer = () => {
         console.log(error);
       }
     };
+    const getChannelMessages = async () => {
+      try {
+        const response = await apiClient.get(
+          `${GET_CHANNEL_MESSAGES}/${selectedChatData._id}`,
+          { withCredentials: true }
+        );
+        if (response.status === 200) {
+          setSelectedChatMessages(response.data?.messages);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
     if (selectedChatType === "contact" && selectedChatData?._id) {
       getMessages();
+    } else if (selectedChatType === "channel" && selectedChatData?._id) {
+      getChannelMessages();
     }
   }, [selectedChatData, selectedChatType, setSelectedChatMessages]);
 
